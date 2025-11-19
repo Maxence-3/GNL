@@ -6,7 +6,7 @@
 /*   By: mde-carv <mde-carv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 21:43:06 by mde-carv          #+#    #+#             */
-/*   Updated: 2025/11/19 03:57:57 by mde-carv         ###   ########.fr       */
+/*   Updated: 2025/11/19 06:57:29 by mde-carv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,16 +26,28 @@ void	ft_putstr(char *str)
 	}
 }
 
-void	ft_realloc(void *ptr, size_t new_size)
+void	*ft_memcpy(void *dest, const void *src, size_t n)
 {
-	char	*new_ptr;
+	char		*d;
+	const char	*s;
 
-	new_ptr = malloc(sizeof(char *) * new_size);
-	// if (!new_ptr)
-	// 	return (NULL);
-	memcpy(new_ptr, ptr, new_size);
+	d = dest;
+	s = src;
+	if (!dest && !src)
+		return (NULL);
+	while (n--)
+		d[n] = s[n];
+	return (dest);
+}
+
+void	*ft_realloc(void *ptr, size_t new_size)
+{
+	void	*new_ptr;
+
+	new_ptr = malloc(new_size);
+	ft_memcpy(new_ptr, ptr, new_size - 1);
 	free(ptr);
-	ptr = new_ptr;
+	return (new_ptr);
 }
 
 char	*get_next_line(int fd)
@@ -47,7 +59,7 @@ char	*get_next_line(int fd)
 
 	if (fd == -1)
 		return (NULL);
-	line = malloc(sizeof(char *));
+	line = malloc(1);
 	if (!line)
 		return (NULL);
 	nb_read = read(fd, &current, 1);
@@ -57,7 +69,7 @@ char	*get_next_line(int fd)
 		line[i] = current;
 		i++;
 		nb_read = read(fd, &current, 1);
-		ft_realloc(line, i);
+		line = ft_realloc(line, i + 1);
 	}
 	line[i] = '\0';
 	return(line);
@@ -69,7 +81,5 @@ int main(void)
 	char * test = get_next_line(fd);
 	ft_putstr(test);
 	free(test);
-/* 	test = get_next_line(fd);
-	free(test); */
 	close(fd);
 }
