@@ -6,7 +6,7 @@
 /*   By: mde-carv <mde-carv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 21:43:06 by mde-carv          #+#    #+#             */
-/*   Updated: 2025/11/19 06:57:29 by mde-carv         ###   ########.fr       */
+/*   Updated: 2025/11/20 17:10:51 by mde-carv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,46 +40,72 @@ void	*ft_memcpy(void *dest, const void *src, size_t n)
 	return (dest);
 }
 
-void	*ft_realloc(void *ptr, size_t new_size)
+int	check(int nb_read, char *buf)
 {
-	void	*new_ptr;
+	if (nb_read == -1)
+	{
+		free(buf);
+		return (0);
+	}
+	return (1);
+}
 
-	new_ptr = malloc(new_size);
-	ft_memcpy(new_ptr, ptr, new_size - 1);
-	free(ptr);
-	return (new_ptr);
+int	is_containt_backline(char *line)
+{
+	int	i;
+
+	i = 0;
+	while (line[i])
+	{
+		if (line[i] == '\n')
+			return (i);
+	}
+	return (0);
 }
 
 char	*get_next_line(int fd)
 {
-	char	current;
-	char	*line;
-	int 	nb_read;
-	int		i;
-
-	if (fd == -1)
+	static char *save;
+	int			nb_read;
+	char		*buf;
+	char		*line;
+	char		*res;
+	
+	buf = malloc(sizeof(char) * BUFFER_SIZE);
+	if (!buf)
 		return (NULL);
-	line = malloc(1);
-	if (!line)
-		return (NULL);
-	nb_read = read(fd, &current, 1);
-	i = 0;
-	while (current != '\n' && nb_read != 0)
-	{
-		line[i] = current;
-		i++;
-		nb_read = read(fd, &current, 1);
-		line = ft_realloc(line, i + 1);
+	if (*save)
+		line = ft_strdup(save);
+	else
+		line = ft_strdup("");
+	while (!is_containt_backline(line))
+	{	
+		nb_read = read(fd, buf, sizeof(char) * BUFFER_SIZE);
+		if (check(nb_read, buf))
+			return ("NON !");
+		line = ft_strjoin(line, buf);
+		ft_bzero(buf, BUFFER_SIZE);
 	}
-	line[i] = '\0';
-	return(line);
+	save = ft_strdup(&line[i]);
+	res = ft_strndup();
+	free(buf);
+	return (res);
 }
 
 int main(void)
 {
 	int fd = open("test.txt", O_RDONLY);
-	char * test = get_next_line(fd);
+	char * test;
+	// int i = 0;
+	test = get_next_line(fd);
 	ft_putstr(test);
 	free(test);
+	// while (i < 3)
+	// {
+	// 	test = get_next_line(fd);
+	// 	ft_putstr(test);
+	// 	free(test);
+	// 	i++;
+	// }
 	close(fd);
 }
