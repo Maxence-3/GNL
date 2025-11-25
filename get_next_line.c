@@ -6,106 +6,101 @@
 /*   By: mde-carv <mde-carv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/18 21:43:06 by mde-carv          #+#    #+#             */
-/*   Updated: 2025/11/20 17:10:51 by mde-carv         ###   ########.fr       */
+/*   Updated: 2025/11/25 06:47:39 by mde-carv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <stdio.h>
-#include <string.h>
 
-void	ft_putstr(char *str)
+void	ft_bzero(void *tab, size_t n)
 {
-	int	i;
+	size_t	i;
 
 	i = 0;
-	while(str[i])
+	while (i < n)
 	{
-		write(1, &str[i], 1);
+		((unsigned char *)tab)[i] = '\0';
 		i++;
 	}
 }
 
-void	*ft_memcpy(void *dest, const void *src, size_t n)
+int	ft_strlen(char *s)
 {
-	char		*d;
-	const char	*s;
+	int	index;
 
-	d = dest;
-	s = src;
-	if (!dest && !src)
-		return (NULL);
-	while (n--)
-		d[n] = s[n];
-	return (dest);
+	index = -1;
+	while (*(s + (++index)))
+		;
+	return (index);
 }
 
-int	check(int nb_read, char *buf)
+char	*ft_nomore(char **buffer, char **line)
 {
-	if (nb_read == -1)
-	{
-		free(buf);
-		return (0);
-	}
-	return (1);
+	free(*buffer);
+	if (**line)
+		return (*line);
+	free(*line);
+	return (NULL);
 }
 
-int	is_containt_backline(char *line)
+int	ft_alloc(char **buffer, char **line, char **next, int *nb_read)
 {
-	int	i;
-
-	i = 0;
-	while (line[i])
+	*buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	if (!(*buffer))
+		return (-1);
+	if (*next)
 	{
-		if (line[i] == '\n')
-			return (i);
+		*line = ft_strdup(*next);
+		free(*next);
+		*next = NULL;
 	}
+	else
+		*line = ft_calloc(1, sizeof(char));
+	*nb_read = 1;
 	return (0);
 }
 
 char	*get_next_line(int fd)
 {
-	static char *save;
-	int			nb_read;
-	char		*buf;
+	static char	*next;
 	char		*line;
-	char		*res;
-	
-	buf = malloc(sizeof(char) * BUFFER_SIZE);
-	if (!buf)
+	char		*buffer;
+	int			nb_read;
+	int			i;
+
+	i = ft_alloc(&buffer, &line, &next, &nb_read);
+	if (i == -1)
 		return (NULL);
-	if (*save)
-		line = ft_strdup(save);
-	else
-		line = ft_strdup("");
-	while (!is_containt_backline(line))
-	{	
-		nb_read = read(fd, buf, sizeof(char) * BUFFER_SIZE);
-		if (check(nb_read, buf))
-			return ("NON !");
-		line = ft_strjoin(line, buf);
-		ft_bzero(buf, BUFFER_SIZE);
+	while ((ft_strchr(line, '\n') == NULL) && nb_read > 0)
+	{
+		nb_read = read(fd, buffer, BUFFER_SIZE);
+		if (nb_read < 0)
+			return (free(buffer), free(line), NULL);
+		line = ft_strjoin(line, buffer);
+		ft_bzero(buffer, BUFFER_SIZE);
 	}
-	save = ft_strdup(&line[i]);
-	res = ft_strndup();
-	free(buf);
-	return (res);
+	if (nb_read == 0)
+		return (ft_nomore(&buffer, &line));
+	while (line[i] && line[i] != '\n')
+		i++;
+	next = ft_strdup(&line[i + 1]);
+	line = ft_strndup(&line, i + 1);
+	free(buffer);
+	return (line);
 }
 
-int main(void)
-{
-	int fd = open("test.txt", O_RDONLY);
-	char * test;
-	// int i = 0;
-	test = get_next_line(fd);
-	ft_putstr(test);
-	free(test);
-	// while (i < 3)
-	// {
-	// 	test = get_next_line(fd);
-	// 	ft_putstr(test);
-	// 	free(test);
-	// 	i++;
-	// }
+WE;FRLmkjhg;alskfjgbv;ladrkjglf
+	int fd;
+	char *str;
+
+	fd = open("test.txt", O_RDONLY);
+	while (1)
+	{
+		str = get_next_line(fd);
+		if (str == NULL)
+			break;
+		printf("%s", str);
+		free(str);
+	}
 	close(fd);
 }
