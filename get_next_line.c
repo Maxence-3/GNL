@@ -89,7 +89,8 @@ char	*get_next_line(int fd)
 	return (line);
 }
 
-WE;FRLmkjhg;alskfjgbv;ladrkjglf
+/* #include <stdio.h>
+int main(void){
 	int fd;
 	char *str;
 
@@ -103,4 +104,4 @@ WE;FRLmkjhg;alskfjgbv;ladrkjglf
 		free(str);
 	}
 	close(fd);
-}
+} */
